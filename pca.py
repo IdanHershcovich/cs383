@@ -28,8 +28,7 @@ def yaleMatrix(directory, matrix):
        
     return matrix
 
-###standardizing data formula is Z = (X-meanOfDimension) / std. X is the current value of the matrix that is going to be standardized. 
-#I need to make a loop that applies the formula to each value in the 2d array.
+###standardizing data formula is Z = (X-meanOfDimension) / std. X is the current value of the matrix that is going to be standardized.
 def standardize(data):
 
    stand = (data-data.mean(axis=(0,1), keepdims=1))/data.std(axis=(0,1), keepdims=1)
@@ -45,17 +44,22 @@ def pca(X):
     eigen_vals, eigen_vecs = np.linalg.eig(C)
     # Project X onto PC space
     X_pca = np.dot(X, eigen_vecs)
-    print(X_pca)
+    
     return X_pca
 
 
+###calls the function that processes the images and puts them in a matrix
 matrix_test = yaleMatrix('yalefaces', empty_matrix)
+
+###standardizes the matrix
 standardized_matrix = standardize(matrix_test)
 
 
+###matrix after pca
 pcam= pca(standardized_matrix)
 
-plt.plot(pcam)
+plt.scatter(pcam[ : , 1],pcam[ : , 2]) 
+
 plt.show()
 
 
