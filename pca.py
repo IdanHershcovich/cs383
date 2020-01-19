@@ -1,13 +1,16 @@
 import os
 import numpy as np
 from PIL import Image as im
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 np.set_printoptions(threshold=np.inf) #print all of output without trunc
 width = 40
 height = 40
 
 empty_matrix = np.empty([0,1600], dtype=np.uint8)
+
+
+
 
 ###given an image, a height and a width, resize and return the new image
 def resize_im(image, h, w):
@@ -31,7 +34,7 @@ def yaleMatrix(directory, matrix):
 ###standardizing data formula is Z = (X-meanOfDimension) / std. X is the current value of the matrix that is going to be standardized.
 def standardize(data):
 
-   stand = (data-data.mean(axis=(0,1), keepdims=1))/data.std(axis=(0,1), keepdims=1)
+   stand = (data-data.mean(axis=(0,1), keepdims=1))/data.std(axis=(0), keepdims=1, ddof=1)
    return stand
 
 def pca(X):
@@ -45,7 +48,7 @@ def pca(X):
     # Project X onto PC space
     X_pca = np.dot(X, eigen_vecs)
     
-    return X_pca
+    return X_pca[:,:2]
 
 
 ###calls the function that processes the images and puts them in a matrix
@@ -58,9 +61,18 @@ standardized_matrix = standardize(matrix_test)
 ###matrix after pca
 pcam= pca(standardized_matrix)
 
-plt.scatter(pcam[ : , 1],pcam[ : , 2]) 
 
-plt.show()
+# plt.scatter(pcam[ : , 0],pcam[ : , 1]) 
+
+# plt.show()
 
 
 
+### THEORY PART D and E 
+# partOneMatrix = np.array([[-2,1],[-5,-4], [-3,1], [0,3], [-8,11], [-2,5], [1,0], [5,-1], [-1,-3], [6,1]])
+# print(partOneMatrix)
+# print(partOneMatrix.shape)
+
+# stand = standardize(partOneMatrix)
+# # pcaOne = pca(stand)
+# print(stand)
