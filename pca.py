@@ -1,7 +1,8 @@
 import os
 import numpy as np
 from PIL import Image as im
-# import matplotlib.pyplot as plt
+
+import matplotlib.pyplot as plt
 
 np.set_printoptions(threshold=np.inf) #print all of output without trunc
 width = 40
@@ -34,45 +35,51 @@ def yaleMatrix(directory, matrix):
 ###standardizing data formula is Z = (X-meanOfDimension) / std. X is the current value of the matrix that is going to be standardized.
 def standardize(data):
 
-   stand = (data-data.mean(axis=(0,1), keepdims=1))/data.std(axis=(0), keepdims=1, ddof=1)
+   stand = (data-data.mean(axis=(0), keepdims=False))/data.std(axis=(0,1), keepdims=False, ddof=1)
    return stand
 
-def pca(X):
+# Arguments for pca are the matrix with the data, and the number of dimensions we want to reduce to.
+def pca(X, dims):
     # Data matrix X, assumes 0-centered
     n, m = X.shape
-    # assert np.allclose(X.mean(axis=0), np.zeros(m))
+    assert np.allclose(X.mean(axis=0), np.zeros(m))
     # Compute covariance matrix
     C = np.dot(X.T, X) / (n-1)
     # Eigen decomposition
     eigen_vals, eigen_vecs = np.linalg.eig(C)
+
+    # Sorts eigenvalues and eigen vectors. Returns the biggest eigenvectors. Quantity specified with the dims argument.
+    idx = eigen_vals.argsort()[-dims:][::-1]
+    eigen_vals = eigen_vals[idx]
+    eigen_vecs = eigen_vecs[:,idx]
+
     # Project X onto PC space
     X_pca = np.dot(X, eigen_vecs)
-    
-    return X_pca[:,:2]
+    return X_pca
+    # X_pca[:,:2] returns first two columns
 
 
-###calls the function that processes the images and puts them in a matrix
+# Calls the function that processes the images and puts them in a matrix
 matrix_test = yaleMatrix('yalefaces', empty_matrix)
 
-###standardizes the matrix
+# Standardizes the matrix
 standardized_matrix = standardize(matrix_test)
 
 
-###matrix after pca
-pcam= pca(standardized_matrix)
+#Matrix after pca
+matrix_pca= pca(standardized_matrix, 2)
 
 
-# plt.scatter(pcam[ : , 0],pcam[ : , 1]) 
+plt.scatter(matrix_pca[ : , 0],matrix_pca[ : , 1]) 
 
-# plt.show()
+plt.show()
 
 
 
 ### THEORY PART D and E 
-# partOneMatrix = np.array([[-2,1],[-5,-4], [-3,1], [0,3], [-8,11], [-2,5], [1,0], [5,-1], [-1,-3], [6,1]])
-# print(partOneMatrix)
-# print(partOneMatrix.shape)
+partOneMatrix = np.array([[-2,1],[-5,-4], [-3,1], [0,3], [-8,11], [-2,5], [1,0], [5,-1], [-1,-3], [6,1]])
 
-# stand = standardize(partOneMatrix)
-# # pcaOne = pca(stand)
-# print(stand)
+
+stand = standardize(partOneMatrix)
+pcaOne = pca(stand, 2)
+print(pcaOne)
