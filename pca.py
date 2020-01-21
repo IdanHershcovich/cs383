@@ -44,11 +44,12 @@ def pca(X, dims):
     n, m = X.shape
     assert np.allclose(X.mean(axis=0), np.zeros(m))
     # Compute covariance matrix
-    C = np.dot(X.T, X) / (n-1)
+    C = np.cov(X, rowvar=0)
     # Eigen decomposition
     eigen_vals, eigen_vecs = np.linalg.eig(C)
+    print (str.format("eig vals {}", eigen_vals))
 
-    # Sorts eigenvalues and eigen vectors. Returns the biggest eigenvectors. Quantity specified with the dims argument.
+    # Sorts eigenvalues and eigen vectors. Returns the most signifacnt eigen vals/vec. Quantity of dimensions specified with the dims argument.
     idx = eigen_vals.argsort()[-dims:][::-1]
     eigen_vals = eigen_vals[idx]
     eigen_vecs = eigen_vecs[:,idx]
@@ -58,28 +59,35 @@ def pca(X, dims):
     return X_pca
     # X_pca[:,:2] returns first two columns
 
-
-# Calls the function that processes the images and puts them in a matrix
-matrix_test = yaleMatrix('yalefaces', empty_matrix)
+# Part 2
+#Calls the function that processes the images and puts them in a matrix
+yaleMatrix = yaleMatrix('yalefaces', empty_matrix)
 
 # Standardizes the matrix
-standardized_matrix = standardize(matrix_test)
+standardized_matrix = standardize(yaleMatrix)
 
 
 #Matrix after pca
-matrix_pca= pca(standardized_matrix, 2)
+matrix_pca= pca(standardized_matrix, 0)
+
+print(matrix_pca.shape)
+
+## Visualization
+# plt.scatter(matrix_pca[ : , 0],matrix_pca[ : , 1]) 
+
+# plt.show()
 
 
-plt.scatter(matrix_pca[ : , 0],matrix_pca[ : , 1]) 
+### Part 3
+face = im.open('yalefaces/subject02.centerlight')
 
-plt.show()
+res_im = resize_im(face, height, width)
+im_as_arr = np.asarray(res_im, dtype=np.uint8)
+flat = im_as_arr.flatten()
+flat = np.column_stack(flat)
+matrix = np.concatenate((empty_matrix, flat), axis=0)
 
+print(matrix.shape)
 
-
-### THEORY PART D and E 
-partOneMatrix = np.array([[-2,1],[-5,-4], [-3,1], [0,3], [-8,11], [-2,5], [1,0], [5,-1], [-1,-3], [6,1]])
-
-
-stand = standardize(partOneMatrix)
-pcaOne = pca(stand, 2)
-print(pcaOne)
+# for k in D:
+    

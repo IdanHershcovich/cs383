@@ -114,7 +114,26 @@ $
 	\item Which feature is more discriminating based on results in Part (a) (5pt)?\\
 	\textbf{The first feature is more discriminating}
 	\item What are the principle components of the matrix $X$?  For this (and the next) part you may assume that the features are \emph{continuous}.  Make sure the principle components  are all unit length.   You \textbf{MAY} use a utility function like \emph{eig} or \emph{svd} to determine these. (5pts)
+	
+	\centering{$cov_{x,y}=\frac{\sum_{i=1}^{N}(x_{i}-\bar{x})(y_{i}-\bar{y})}{N-1}$} \\
+	
+		\textbf {To get the principle components, we need the eigen vectors, so we get them after using our original matrix to compute the covariance matrix. The resulting eigenvectors are: } \\
+		
+		\begin{bmatrix}
+        -0.71636104 & 0.69772979 \\
+        -0.69772979 & -0.71636104
+        \end{bmatrix}
+
+
 	\item If we were to project our data down to 1-D using the principle component, what would the new data matrix $X$ be? (5pts)
+	
+	\textbf{by multiplying the standardized data by our eigenvectors, the new data matrix would be} \\
+	
+	X =	\begin{bmatrix}
+        -0.1117808\\ 0.23419233 \\ -0.27394203 \\ -0.12044108 \\ -2.74966176 \\ -0.77774625 \\ 0.54119423 \\ 1.35633049 \\ 0.71634587 \\ 1.18550899
+        \end{bmatrix}
+	
+	
 	\end{enumerate}
 
 \end{enumerate}
@@ -122,86 +141,11 @@ $
 
 \newpage
 \section{(30pts) Dimensionality Reduction via PCA}\label{pca}
-Download and extract the dataset \emph{yalefaces.zip} from Blackboard.  This dataset has 154 images ($N=154$) each of which is a 243x320 image ($D=77760$).  In order to process this data your script will need to:
 
-\begin{enumerate}
-\item Read in the list of files
-\item Create a 154x1600 data matrix such that for each image file
-	\begin{enumerate}
-	\item Read in the image as a 2D array (234x320 pixels)
-	\item Subsample/resize the image to become a 40x40 pixel image (for processing speed).  I suggest you use your image processing library to do this for you.
-	\item \emph{Flatten} the image to a 1D array (1x1600)
-	\item Concatenate this as a row of your data matrix.
-	\end{enumerate}
-\end{enumerate}
-
-\noindent
-Once you have your data matrix, your script should:
-\begin{enumerate}
-  \item Standardizes the data
-  \item Reduces the data to 2D using PCA
-  \item Plot the data as points in 2D space for visualization
-\end{enumerate}
-
-\noindent
-Recall that although you may not use any package ML functions like \emph{pca}, you \textbf{may} use statistical functions like \emph{svd, eig}.\\
-
-\noindent
-Your graph should end up looking similar to Figure \ref{PCA} (although it may be rotated differently, depending how you ordered things and/or your statistical library).
-\begin{figure}[H]
-\begin{center}
-\label{PCA}
-\end{center}
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=20cm]{Figure_1.png}
+    \caption{PCA Visualization}
+    \label{fig:PCA Visualization}
 \end{figure}
-
-\textbf{NOTE:} Depending on your linear algebra package, the eigenvectors may have the opposite direction.  This is fine since technically an eigenvector multiplied by any scalar are equivalent.
-
-\newpage
-\section{(30 points) Eigenfaces}\label{eigenface}
-One (cool?) application of PCA is be lossy-compression.   We can project our data down to $k$ dimenions (where $k<D$), then when we need to reconstruct our data, we can just multiply the $k$ dimensional data by (the transpose of) its $k$ associated principle components in order to return to our original feature space!\\
-
-\noindent
-In this part of the assignment you'll be making a \emph{video} showing how the reconstruction looks as you varying $k$, from $k=1$ to $k=D$. affects the reconstruction, visualizing this as a video.  If you're working in Matlab I'd suggest using the \emph{VideoWriter} class.  If you're working in Python you might want to use Python's opencv module:  \emph{pip3 install -user opencv-python}.
-
-\noindent
-\paragraph{Write a script that:}
-\begin{enumerate}
-\item Takes your original $154x1600$ standardized data matrix from the previous problem and
-  	\item Performs PCA on the data (again, although you may not use any package ML functions like \emph{pca}, you \textbf{may} use statistical functions like \emph{svd, eig}).
-	\item For $k=1,...,D$:
-	\begin{enumerate}
-		\item Projects \emph{subject02.centerlight} onto the $k$ most important principle components, resulting in a feature vector of length $k$.  
-	   \item Reconstructs this person, again using the $k$ most significant principle components (your feature vector should now once again be $1\times1600$).
-		\item Un-does the standardization (multiplies back in the std and add back in the mean feature vector).
-		\item Reshapes this feature vector to be a $40\times40$ image/matrix.
-		\item Adds this image as the next frame in your video, superimposing on it the current value $k$.
-	\end{enumerate}
-\item Saves the video.
-\end{enumerate}
-
-\newpage
-\section*{Submission}
-For your submission, upload to Blackboard a single zip file containing:
-
-\begin{enumerate}
-\item PDF Writeup
-\item Source Code
-\item readme.txt file
-\item You do not need to include the images (nor the video, we will regenate it all with your code).
-\item You \textbf{no not} need to include the dataset.  HOWEVER, it should be clear in your script (and/or readme) where your code expects the dataset to reside.
-\end{enumerate}
-
-\noindent
-The readme.txt file should contain information on how to run your code to reproduce results for each part of the assignment.  In particular for this assignment, it should also indicate where the \emph{yalefaces} directory should be in order to run.  Do not include spaces or special characters (other than the underscore character) in your file and directory names.  Doing so may break our grading scripts.\\
-
-\noindent
-The PDF document should contain the following:
-\begin{enumerate}
-\item Part 1: Your answers to the theory questions.
-\item Part 2: The visualization of the PCA result
-\item Part 3: (Nothing)
-\end{enumerate}
-
 \end{document}
-
-
