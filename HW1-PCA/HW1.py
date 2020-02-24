@@ -2,7 +2,8 @@ import os
 import numpy as np
 from PIL import Image as im
 import cv2
-import glob
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 width = 40
@@ -118,13 +119,13 @@ matrix_pca, eigen_vals, eigen_vecs= pca(standardized_matrix, 2)
 #Once the image shows when the script is called, the image viewer must be closed in order to run the rest of the script!
 plt.scatter(matrix_pca[ : , 0],matrix_pca[ : , 1]) 
 
-plt.show()
+plt.savefig('2d_plot.png')
 
 
 ### Part 3
 # Calls lossy compresison on the standardized yalematrix 
 
-lossyComp(standardized_matrix, 0, 150)
+lossyComp(standardized_matrix, 0, 1600)
 
 
 
