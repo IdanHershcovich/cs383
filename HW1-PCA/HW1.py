@@ -36,9 +36,12 @@ def yaleMatrix(directory, matrix):
 
 ###standardizing data formula is Z = (X-meanOfDimension) / std. X is the current value of the matrix that is going to be standardized.
 def standardize(data):
+   stand = (data)
+   test = data.mean(axis=(0), keepdims=False)
+   test2 = data.std(axis=(0), keepdims=False)
 
-   stand = (data-data.mean(axis=(0), keepdims=False))/data.std(axis=(0,1), keepdims=False, ddof=1)
-   return stand, data.mean(axis=(0), keepdims=False), data.std(axis=(0,1), keepdims=False, ddof=1)
+   stand = (stand-test) / test2
+   return stand, data.mean(axis=(0), keepdims=False), data.std(axis=(0), keepdims=False, ddof=1)
 
 # Arguments for pca are the matrix with the data, and the number of dimensions we want to reduce to.
 def pca(X, dims):
@@ -52,8 +55,8 @@ def pca(X, dims):
 
     # Sorts eigenvalues and eigen vectors. Returns the most signifacnt eigen vals/vec. Quantity of dimensions specified with the dims argument.
     idx = eigen_vals.argsort()[-dims:][::-1]
-    eigen_vals = eigen_vals[idx]
-    eigen_vecs = eigen_vecs[:,idx]
+    eigen_vals = eigen_vals
+    eigen_vecs = eigen_vecs
 
     # Project X onto PC space
     X_pca = np.dot(-X, eigen_vecs)
