@@ -179,7 +179,7 @@ def myKMeans(data_clusterX, target_clusterY, k):
 
             centroids = centroids_updated
             iters += 1
-            print(str.format("frames left: {}" (40-iters)))
+            print(str.format("frames left: {}", (40-iters)))
         else:
             video()
            
