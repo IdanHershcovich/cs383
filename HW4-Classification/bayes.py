@@ -1,9 +1,5 @@
-import math
-import random
-
+import math, random
 import numpy as np
-from sklearn.model_selection import train_test_split
-
 np.random.seed(0)
 np.set_printoptions(suppress=True)
 
@@ -38,18 +34,36 @@ def parseAndClassify(data):
 		else:
 			
 			not_spam.append(training_stand[i])
-
-
 	return training_data, testing_data, spam, not_spam
 
+def gaussianDist(vector, feature):
+	e = math.e
+	pdf = 1/((vector.std())*(math.sqrt(2*(math.pi))))
+	x_mean = math.pow((feature-vector.mean()),2)
+	twovar = 2*vector.var()
+	power = (-1) * (x_mean/twovar)
+	# power = (-1)*((math.pow((feature-vector.mean()),2))/(2*(feature.var())))
+	pdf = pdf * math.pow(e,power)
+
+	return pdf
 
 def bayes(data):	
 
-	tr,te, spam, n_spam = parseAndClassify(data)
-	
-	
-	import pdb; pdb.set_trace()
-	
+	training_data,testing_data, spam, n_spam = parseAndClassify(data)
+	spam = np.asarray(spam)
+	n_spam = np.asarray(n_spam)
+	# spam_model = []
+	n_spam_model = {}
+	spam_model = {}
 
+	# dictionary for a gaussian model for each feature for each class. each dict has a singular value for each feature
+	for feature in range(np.size(spam,axis=1)):
+		for row in range(np.size(spam,axis=0)):
+			spam_model["feature{0}".format(feature+1)] = gaussianDist(spam,spam[row,feature])
+
+	for feature in range(np.size(n_spam,axis=1)):
+		for row in range(np.size(n_spam,axis=0)):
+			n_spam_model["feature{0}".format(feature+1)] = gaussianDist(n_spam,n_spam[row,feature])
+	import pdb; pdb.set_trace()
 
 bayes('spambase.data')
