@@ -1,15 +1,22 @@
 import math, random
 import numpy as np
 np.random.seed(0)
-np.set_printoptions(suppress=True)
+# np.set_printoptions(suppress=True)
 
 def standardize(data):
    stand = (data)
-   test = data.mean(axis=(0), keepdims=False)
-   test2 = data.std(axis=(0), keepdims=False)
+   m = data.mean(axis=0)
+   std = data.std(axis=0,ddof=1)
 
-   stand = (stand-test) / test2
+   stand = (stand-m) / std
    return stand
+
+def standardizeWithTrain(data, tr_mean, tr_std):
+	stand = (data)
+	m = tr_mean
+	std = tr_std
+	stand = (stand-m) / std
+	return stand
 
 def parseAndClassify(data):
 	# get data from file
@@ -25,45 +32,115 @@ def parseAndClassify(data):
 
 	#Separate into spam and not spam
 	training_stand = standardize(training_data[:,:-1])
+	testing_data_label = testing_data[:, -1]
+	testing_data = standardizeWithTrain(testing_data[:,:-1], training_data[:,:-1].mean(axis=0), training_data[:,:-1].std(axis=0,ddof=1))
+	
 	spam = []
 	not_spam = []
 	for i in range(np.size(training_stand,axis=0)):
 		if(training_data[i,-1:]) == 1:
-			
 			spam.append(training_stand[i])
 		else:
-			
 			not_spam.append(training_stand[i])
-	return training_data, testing_data, spam, not_spam
 
-def gaussianDist(vector, feature):
-	e = math.e
-	pdf = 1/((vector.std())*(math.sqrt(2*(math.pi))))
-	x_mean = math.pow((feature-vector.mean()),2)
-	twovar = 2*vector.var()
+	spam = np.asarray(spam)
+	not_spam = np.asarray(not_spam)
+	return training_data, testing_data, testing_data_label, spam, not_spam
+
+#likelihood
+def gaussianDist(feature, obs):
+	mean = feature.mean()
+	std = feature.std(ddof=1)
+	if std <= 0.0000000001:
+		return 0.0000000001
+
+	variance = math.pow(std,2)
+	pdf = 1/((std*(math.sqrt(2*(math.pi)))))
+	x_mean = math.pow((obs-mean),2)
+	twovar = 2*variance
 	power = (-1) * (x_mean/twovar)
-	# power = (-1)*((math.pow((feature-vector.mean()),2))/(2*(feature.var())))
-	pdf = pdf * math.pow(e,power)
+	pdf *= 	math.exp(power)
+
+	if pdf == 0:
+		pdf = 0.000000001
 
 	return pdf
 
-def bayes(data):	
 
-	training_data,testing_data, spam, n_spam = parseAndClassify(data)
-	spam = np.asarray(spam)
-	n_spam = np.asarray(n_spam)
-	# spam_model = []
-	n_spam_model = {}
-	spam_model = {}
+def likelihood(dictionary,y_class, testing_data):
+	for row in range(np.size(testing_data,axis=0)):
+		for feature in range(np.size(y_class,axis=1)):
+			dictionary[row] +=  math.log(gaussianDist(y_class[:,feature],testing_data[row,feature]))
+	
+def precision(tp,fp):
+	p = tp/(tp+fp)
+	print(str.format("Precision: {}", p))
+	return p
 
-	# dictionary for a gaussian model for each feature for each class. each dict has a singular value for each feature
-	for feature in range(np.size(spam,axis=1)):
-		for row in range(np.size(spam,axis=0)):
-			spam_model["feature{0}".format(feature+1)] = gaussianDist(spam,spam[row,feature])
+def recall(tp,fn):
+	r = tp/(tp+fn)
+	print(str.format("Recall: {}", r))
+	return r
 
-	for feature in range(np.size(n_spam,axis=1)):
-		for row in range(np.size(n_spam,axis=0)):
-			n_spam_model["feature{0}".format(feature+1)] = gaussianDist(n_spam,n_spam[row,feature])
-	import pdb; pdb.set_trace()
+def fMeasure(pr,re):
+	f = 2*pr*re / (pr + re) 
+	print(str.format("f-Measure: {}", f))
+	return f
 
-bayes('spambase.data')
+def accuracy(testing_data,true_p, true_n):
+	acc = (1/np.size(testing_data, axis=0)) * (true_p+true_n)
+	print(str.format("accuracy: {}", acc))
+	return acc
+
+def binClassification(testing_data,true_class, pred_class):
+	true_p = 0
+	true_n = 0
+	false_p = 0
+	false_n = 0
+	
+	for i in range(len(pred_class)):
+		if true_class[i] == pred_class[i] and true_class[i] == 1:
+			true_p +=1
+		elif true_class[i] == pred_class[i] and true_class[i] == 0:
+			true_n += 1
+		elif true_class[i] != pred_class[i] and true_class[i] == 1:
+			false_n +=1
+		elif true_class[i] != pred_class[i] and true_class[i] == 0:
+			false_p +=1
+	return true_p, true_n, false_p, false_n
+
+def compare(spam,n_spam):
+	predicted_data= {}
+	for i in range(len(spam)):
+		
+		if spam[i] > n_spam[i]:
+			predicted_data[i] = 1
+		else: 
+			predicted_data[i] = 0
+	return predicted_data
+
+
+if __name__ == "__main__":
+    # execute only if run as a script
+	training_data, testing_data, testing_data_label, spam, n_spam = parseAndClassify('spambase.data')
+	ns_likelihood = {
+		i: math.log((np.size(n_spam,axis=0)/np.size(training_data, axis=0)))
+			
+            for i in range(np.size(testing_data,axis=0))
+	}
+	s_likelihood = {
+		i:math.log((np.size(spam,axis=0)/np.size(training_data,axis=0)))
+			
+            for i in range(np.size(testing_data,axis=0))
+	}
+	likelihood(s_likelihood,spam, testing_data)
+	likelihood(ns_likelihood, n_spam, testing_data)
+	
+	predicted_class = compare(s_likelihood, ns_likelihood)
+
+	true_p, true_n, false_p, false_n = binClassification(testing_data, testing_data_label, predicted_class)
+
+	acc = accuracy(testing_data, true_p, true_n)
+	pr = precision(true_p, false_p)
+	re = recall(true_p, false_n)
+	f_m = fMeasure(pr, re)
