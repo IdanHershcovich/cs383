@@ -3,6 +3,7 @@ import numpy as np
 np.random.seed(0)
 # np.set_printoptions(suppress=True)
 
+#same as previous hws
 def standardize(data):
    stand = (data)
    m = data.mean(axis=0)
@@ -11,6 +12,7 @@ def standardize(data):
    stand = (stand-m) / std
    return stand
 
+#for standardizing test. Passing in the mean and std from training
 def standardizeWithTrain(data, tr_mean, tr_std):
 	stand = (data)
 	m = tr_mean
@@ -18,6 +20,7 @@ def standardizeWithTrain(data, tr_mean, tr_std):
 	stand = (stand-m) / std
 	return stand
 
+#The goal of this is to load the data, shuffle it and split it into training and testing. After that, it gets split into the labels
 def parseAndClassify(data):
 	# get data from file
 	full_data = np.genfromtxt(data, delimiter=',')
@@ -47,7 +50,7 @@ def parseAndClassify(data):
 	not_spam = np.asarray(not_spam)
 	return training_data, testing_data, testing_data_label, spam, not_spam
 
-#likelihood
+#likelihood. This calculates P(x|y), the Norm PDF of a single variable
 def gaussianDist(feature, obs):
 	mean = feature.mean()
 	std = feature.std(ddof=1)
@@ -61,17 +64,21 @@ def gaussianDist(feature, obs):
 	power = (-1) * (x_mean/twovar)
 	pdf *= 	math.exp(power)
 
+	#avoid math erros
 	if pdf == 0:
 		pdf = 0.000000001
 
 	return pdf
 
-
+#this function takes a dictionary, initialized to the prior of its respective label, and computes the total likelihood
+#the sum of the 57 features for every row
 def likelihood(dictionary,y_class, testing_data):
 	for row in range(np.size(testing_data,axis=0)):
 		for feature in range(np.size(y_class,axis=1)):
 			dictionary[row] +=  math.log(gaussianDist(y_class[:,feature],testing_data[row,feature]))
-	
+
+
+###Statistics!
 def precision(tp,fp):
 	p = tp/(tp+fp)
 	print(str.format("Precision: {}", p))
@@ -92,6 +99,8 @@ def accuracy(testing_data,true_p, true_n):
 	print(str.format("accuracy: {}", acc))
 	return acc
 
+
+#Classifying with the predicition and the true label
 def binClassification(testing_data,true_class, pred_class):
 	true_p = 0
 	true_n = 0
@@ -109,6 +118,7 @@ def binClassification(testing_data,true_class, pred_class):
 			false_p +=1
 	return true_p, true_n, false_p, false_n
 
+#checking to see if the predicted values are spam or not spam
 def compare(spam,n_spam):
 	predicted_data= {}
 	for i in range(len(spam)):
@@ -122,7 +132,10 @@ def compare(spam,n_spam):
 
 if __name__ == "__main__":
     # execute only if run as a script
+
 	training_data, testing_data, testing_data_label, spam, n_spam = parseAndClassify('spambase.data')
+
+	#Initializing dictionary to the prior of its respective label
 	ns_likelihood = {
 		i: math.log((np.size(n_spam,axis=0)/np.size(training_data, axis=0)))
 			
@@ -133,13 +146,18 @@ if __name__ == "__main__":
 			
             for i in range(np.size(testing_data,axis=0))
 	}
+
+	#populating the dictionaries with the likelihood * prior
 	likelihood(s_likelihood,spam, testing_data)
 	likelihood(ns_likelihood, n_spam, testing_data)
 	
+	#prediction
 	predicted_class = compare(s_likelihood, ns_likelihood)
 
+	#return values for statistics
 	true_p, true_n, false_p, false_n = binClassification(testing_data, testing_data_label, predicted_class)
 
+	#fun stats!
 	acc = accuracy(testing_data, true_p, true_n)
 	pr = precision(true_p, false_p)
 	re = recall(true_p, false_n)
